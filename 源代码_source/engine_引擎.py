@@ -4,6 +4,7 @@
 import math, os, random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+from i18n_翻译 import T, has_cjk, LANG
 
 W, H = 480, 270
 FPS = 24
@@ -101,6 +102,7 @@ def text_img(s, col, font=F12, outline=None, shadow=None):
 
 
 def tw(s, font=F12):
+    s = T(s)
     if font is FH12 and "¥" in s:
         font = F12
     return int(round(font.getlength(s)))
@@ -109,6 +111,7 @@ def tw(s, font=F12):
 def text(img, x, y, s, col=P["white"], font=F12, outline=None, shadow=None, anchor="l", scale=1):
     if not s:
         return
+    s = T(s)
     im = text_img(s, col, font, outline, shadow)
     if scale != 1:
         im = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
@@ -121,8 +124,20 @@ def text(img, x, y, s, col=P["white"], font=F12, outline=None, shadow=None, anch
 
 
 def wrap(s, maxw, font=F12):
+    s = T(s)
     lines = []
     for para in s.split("\n"):
+        if not has_cjk(para):  # English: wrap on word boundaries
+            cur = ""
+            for word in para.split(" "):
+                cand = word if not cur else cur + " " + word
+                if cur and tw(cand, font) > maxw:
+                    lines.append(cur)
+                    cur = word
+                else:
+                    cur = cand
+            lines.append(cur)
+            continue
         cur = ""
         for ch in para:
             if tw(cur + ch, font) > maxw:
@@ -141,6 +156,7 @@ def wrap(s, maxw, font=F12):
 
 
 def big_text(img, x, y, s, col, scale=3, font=FH12, outline=P["black"], shadow=None, anchor="c"):
+    s = T(s)
     im = text_img(s, col, font, outline=None)
     w0 = tw(s, font) + 2
     base = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
@@ -850,7 +866,7 @@ class Scene:
         tt = n / cps
         if hold is None:
             hold = 0.75 + 0.065 * n
-        ln = dict(t0=start, tt=tt, t1=start + tt + hold, who=who, text=txt, expr=expr, box=box or self.box)
+        ln = dict(t0=start, tt=tt, t1=start + tt + hold, who=who, text=T(txt), expr=expr, box=box or self.box)
         self.lines.append(ln)
         sp = SPEAKERS.get(who, {})
         if blips and sp.get("blip"):

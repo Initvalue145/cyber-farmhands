@@ -18,6 +18,9 @@ def kf(keys, t, step=False):
 
 
 def typed(s, t, t0, cps=18.0):
+    s = T(s)
+    if LANG == "en":
+        cps *= 2.2  # English strings are ~2x longer; keep the same reveal time
     if t < t0:
         return ""
     return s[: int((t - t0) * cps)]

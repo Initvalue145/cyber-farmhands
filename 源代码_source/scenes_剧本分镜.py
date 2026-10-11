@@ -132,7 +132,7 @@ def s_title():
         bricks(img, 214)
         p = clamp(lt / 0.55)
         ty = lerp(-60, 56, ease_back(p))
-        big_text(img, W // 2, ty, "赛博长工", (255, 168, 96), scale=5, outline=(50, 20, 40), shadow=(120, 40, 60))
+        big_text(img, W // 2, ty, "赛博长工", (255, 168, 96), scale=5 if LANG != "en" else 4, outline=(50, 20, 40), shadow=(120, 40, 60))
         if t >= s.m["sub"]:
             sub = "—— Claude & GPT 的深夜搞钱计划 ——"
             text(img, W // 2 - tw(sub) // 2, 132, typed(sub, t, s.m["sub"], 20), (255, 255, 255), outline=(30, 20, 40))
@@ -273,8 +273,10 @@ def s_room():
                     text(img, cx + 24, cy + 99, "机场", INK)
                     text(img, cx + cw - 10, cy + 99, "¥80 / 年", (40, 150, 70), anchor="r")
                     if t >= m["vpn"] + 0.7:
+                        tx = cx + 10
                         for j, tag in enumerate(["晚高峰卡顿", "偶尔失联"]):
-                            tx = cx + 10 + j * 78
+                            if j:
+                                tx += tw("晚高峰卡顿") + 16
                             rrect(img, tx, cy + 116, tw(tag) + 8, 13, (240, 210, 200))
                             text(img, tx + 4, cy + 116, tag, (180, 60, 50))
         return img
@@ -661,9 +663,13 @@ def s_media():
             text(img, tx0 + 44, ty0 + 3, "AI 效率技巧", (255, 255, 255), anchor="c")
             paste(img, make_clawd("happy"), tx0 + 2, ty0 + 16)
             paste(img, make_codex("happy"), tx0 + 44, ty0 + 12)
-            if ai_tag:
+            if ai_tag and LANG != "en":
                 rrect(img, tx0 + 54, ty0 + 36, 33, 13, (250, 250, 250))
                 text(img, tx0 + 58, ty0 + 36, "AI生成", (220, 50, 50))
+            elif ai_tag:
+                lab = T("AI生成")
+                rrect(img, x + 98, y + 40, tw(lab) + 8, 13, (255, 230, 230))
+                text(img, x + 102, y + 40, lab, (220, 50, 50))
         text(img, x + 98, y + 6, title, INK)
         paste(img, ICONS["eye"].convert("RGBA"), x + 98, y + 26)
         text(img, x + 110, y + 22, views, (100, 100, 110))
@@ -714,7 +720,8 @@ def s_media():
                 if t >= tt0:
                     px = 236 + (k % 2) * 16
                     py = 98 + k * 20 - int(ease_out(clamp((t - tt0) / 0.2)) * 4)
-                    bubble(img, px, py, c0, "l", (255, 255, 255), INK, 140)
+                    bubble(img, px - (30 if LANG == "en" else 0), py, c0, "l", (255, 255, 255), INK,
+                           200 if LANG == "en" else 140)
         if t >= m["earn"]:
             popup(img, t, m["earn"], 232, 106, 196, 84, "收益", [("创作收益：¥0.38", (220, 120, 20)),
                                                                 ("满 ¥100 才可提现", (220, 50, 50)), "当前进度 0.38%"],
@@ -990,7 +997,7 @@ def s_label():
             text(img, cx + 160, cy + 76, format(n, ","), (40, 140, 120), font=FH12)
             text(img, cx + 100, cy + 94, "单价：¥0.05", (120, 120, 130))
             text(img, cx + 100, cy + 112, "收入：", INK)
-            text(img, cx + 140, cy + 112, "¥%.2f" % (n * 0.05), (230, 120, 20), font=FH12)
+            text(img, cx + 152, cy + 112, "¥%.2f" % (n * 0.05), (230, 120, 20), font=FH12)
             if t >= m["frozen"]:
                 stamp(img, 232, 100, "账号已冻结", (220, 40, 40), clamp((t - m["frozen"]) / 0.18), scale=2)
                 if t >= m["frozen"] + 0.3:
@@ -1050,7 +1057,8 @@ def s_label():
                 text(img, cx + 42, cy + 20, "我不是机器人", INK, font=FH12)
                 hov = t >= m["honest"]
                 text(img, cx + cw // 2, cy + 56, "我是机器人", (40, 90, 220) if not hov else (220, 60, 60), anchor="c")
-                d.line([cx + cw // 2 - 30, cy + 68, cx + cw // 2 + 29, cy + 68], fill=(40, 90, 220) if not hov else (220, 60, 60))
+                uw = tw("我是机器人") // 2
+                d.line([cx + cw // 2 - uw, cy + 68, cx + cw // 2 + uw - 1, cy + 68], fill=(40, 90, 220) if not hov else (220, 60, 60))
                 # cursor
                 if hov:
                     pr = ease_io(clamp((t - m["honest"]) / 0.6))
@@ -1108,6 +1116,7 @@ def notepad(img, x, y, w, h, lines, reveal_n, scroll=0, cursor_t=None):
     clip = Image.new("RGB", (cw, ch), (255, 255, 255))
     full = 0.0
     for i, (l, col) in enumerate(lines):
+        l = T(l)
         yy = 4 + i * 14 - scroll
         if i < int(reveal_n):
             text(clip, 6, yy, l, col)
@@ -1180,7 +1189,7 @@ def s_low():
                 big_text(img, cx + cw // 2, cy + 8, "AI搞钱训练营", (255, 220, 60), scale=2, outline=(90, 30, 0))
                 text(img, cx + cw // 2, cy + 44, "学完月入过万！普通人也能翻身！", (255, 255, 255), anchor="c")
                 text(img, cx + 60, cy + 70, "原价 ¥3999", (230, 180, 180))
-                d.line([cx + 58, cy + 77, cx + 122, cy + 77], fill=(255, 255, 255))
+                d.line([cx + 58, cy + 77, cx + 62 + tw("原价 ¥3999"), cy + 77], fill=(255, 255, 255))
                 big_text(img, cx + 196, cy + 62, "¥199", (255, 240, 80), scale=3, outline=(120, 0, 0))
                 if int(t * 4) % 2 == 0:
                     text(img, cx + cw // 2, cy + 108, "名额仅剩 3 个！", (255, 255, 120), font=FH12, anchor="c")

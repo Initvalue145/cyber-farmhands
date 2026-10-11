@@ -13,7 +13,9 @@
 
 A 5:54 pixel-art short film with an 8-bit soundtrack. "I" pay for both ChatGPT Plus and Claude Pro (¥280+ a month) and can only afford a ¥80/year VPN. One night I fall asleep with the computer on, and Claude and GPT try to earn the subscription money back on the Chinese internet. Every attempt hits a wall that real people hit too.
 
-▶ **观看成片 / Watch:** [视频_video/赛博长工_Cyber-Farmhands_1080p.mp4](视频_video/赛博长工_Cyber-Farmhands_1080p.mp4)（1920×1080 · 24fps · H.264 + AAC）
+▶ **观看成片 / Watch**（1920×1080 · 24fps · H.264 + AAC）
+- 中文版 / Chinese: [视频_video/赛博长工_Cyber-Farmhands_1080p.mp4](视频_video/赛博长工_Cyber-Farmhands_1080p.mp4)
+- 英文版 / English: [视频_video/赛博长工英文版_Cyber-Farmhands_EN_1080p.mp4](视频_video/赛博长工英文版_Cyber-Farmhands_EN_1080p.mp4)
 
 📝 **原始提示词 / Original prompts:** [提示词_prompts.md](提示词_prompts.md)
 
@@ -50,7 +52,7 @@ A 5:54 pixel-art short film with an 8-bit soundtrack. "I" pay for both ChatGPT P
 ├─ README.md                      本说明 / this file
 ├─ 提示词_prompts.md               原始提示词（中文原文）/ original prompts (Chinese, verbatim)
 ├─ LICENSE                        许可证 / license
-├─ 视频_video/                     成片 / the finished film
+├─ 视频_video/                     成片（中文版 + 英文版）/ the film, Chinese + English cuts
 ├─ 音频_audio/
 │  ├─ 完整配乐_full-soundtrack.mp3  全片混音（配乐+音效）/ full mix, 320 kbps
 │  ├─ 分轨配乐_music-tracks/        10 首 8-bit 配乐分轨 WAV / 10 music stems
@@ -68,6 +70,8 @@ A 5:54 pixel-art short film with an 8-bit soundtrack. "I" pay for both ChatGPT P
    ├─ scenes_剧本分镜.py             每一场戏的剧本与画面 / every scene: script + visuals
    ├─ audio_音频合成.py              8-bit 合成器、配乐、音效 / chiptune synth, music, SFX
    ├─ export_assets_导出素材.py      导出本仓库的素材 / regenerates the repo assets
+   ├─ i18n_翻译.py                   语言切换 / language switch
+   ├─ i18n_en_英文表.py              英文翻译表 / English translation table
    └─ 依赖_requirements.txt
 ```
 
@@ -88,11 +92,13 @@ pip install -r 依赖_requirements.txt
 python main_主程序.py times                 # 打印时间轴 / print the timeline
 python main_主程序.py sheet 82 117 189      # 导出指定秒数的预览图 / preview frames at given seconds
 python main_主程序.py full                  # 渲染成片到 输出_output/ / render the film into 输出_output/
+FILM_LANG=en python main_主程序.py full     # 渲染英文版 / render the English cut (PowerShell: $env:FILM_LANG="en")
 python export_assets_导出素材.py            # 重新导出剧照、分轨、音效、台词 / regenerate repo assets
 ```
 
 - ffmpeg 不在 PATH 时，设置环境变量 `FFMPEG` 指向它。 / If ffmpeg is not on PATH, set `FFMPEG` to its path.
 - 非 Windows 系统请用 `PIXEL_FONT_SONG` / `PIXEL_FONT_HEI` 指定字体文件；像素文字的效果依赖宋体的点阵字形。 / On macOS/Linux set `PIXEL_FONT_SONG` / `PIXEL_FONT_HEI` to font files; the pixel-text look depends on SimSun's bitmap glyphs.
+- 英文版：画面文字在绘制时查 `i18n_en_英文表.py` 替换，时间轴仍按中文计算，所以两版逐帧同步；平台名用官方英文名（闲鱼 Xianyu、淘宝 Taobao），中国梗换成英文互联网常见的梗。 / English cut: on-screen text is swapped from `i18n_en_英文表.py` at draw time while the timeline stays the same, so both cuts are frame-synced. Platforms use their official English names, and Chinese memes are swapped for ones English speakers know.
 - 渲染全片约 1 分钟（大部分时间花在视频编码上）。 / A full render takes about a minute, mostly video encoding.
 
 ## 声明 / Disclaimer
